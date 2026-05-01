@@ -24,6 +24,16 @@ info:
     version: '@project.version@'
 
 
+app:
+  mail-settings:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    connectionTimeout: 5000
+    timeout: 3000
+    writeTimeout: 3000
+
+
 send:
   mail: ${CORREO_PRUEBA}
   password: ${PASSWORD}
+
