@@ -1,0 +1,18 @@
+<Configurtaion>
+    <Appenders>
+
+        <Console name="Console" target="SYSTEM.OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} %msg%n" />
+        </Console>
+
+        <File name="FileOut" fileName="D:\work\log4j-javaTes.txt">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} %msg%n" />
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root Level="INFO">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="FileOut" />
+        </Root>
+    </Loggers>
+</Configurtaion>

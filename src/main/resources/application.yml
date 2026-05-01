@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: mail-notifier-service
+
+management:
+
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+
+  endpoint: 
+    health: 
+      show-details: always
+
+info:
+  application:
+    groupId: '@project.groupId@'
+    artifactId: '@project.artifactId@'
+    version: '@project.version@'
+
+
+send:
+  mail: ${CORREO_PRUEBA}
+  password: ${PASSWORD}
