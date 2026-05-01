@@ -17,12 +17,26 @@ public class MailConfig {
     @Value("${send.password}")
     private String password;
 
+    @Value("${app.mail-settings.host}")
+    private String mailHost;
+
+    @Value("${app.mail-settings.port}")
+    private int mailPort;
+    @Value("${app.mail-settings.connectionTimeout}")
+    private int mailConnectionTimeout;
+
+    @Value("${app.mail-settings.timeout}")
+    private int mailTimeout;
+
+    @Value("${app.mail-settings.writeTimeout}")
+    private int mailWriteTimeout;
+
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
 
-        mailSenderImpl.setHost("smtp.gmail.com");
-        mailSenderImpl.setPort(587);
+        mailSenderImpl.setHost(mailHost);
+        mailSenderImpl.setPort(mailPort);
         mailSenderImpl.setUsername(emailUser);
         mailSenderImpl.setPassword(password);
 
@@ -31,6 +45,11 @@ public class MailConfig {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
+
+        //Manejo de timeouts
+       props.put("mail.smtp.connectiontimeout", String.valueOf(mailConnectionTimeout));
+       props.put("mail.smtp.timeout", String.valueOf(mailTimeout));
+       props.put("mail.smtp.writetimeout", String.valueOf(mailWriteTimeout));
 
         return mailSenderImpl;
     }
