@@ -5,9 +5,12 @@ import java.time.format.DateTimeFormatter;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -89,6 +92,6 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
 
     private MailResponse fallBackSendEamil(MailDetails mailDetails, Exception e){
         LOGGER.error("Error inesperado al enviar correo: {}", e.getMessage());
-        return new MailResponse("");
+        throw new ApiMailException(ApiError.VALIDATION_ERROR);
     }
 }
