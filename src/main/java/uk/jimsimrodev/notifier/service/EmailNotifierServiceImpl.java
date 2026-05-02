@@ -3,6 +3,8 @@ package uk.jimsimrodev.notifier.service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +33,7 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
     }
 
     @Override
+    @CircuitBreaker(name="mailSender",fallbackMethod = "mailSenderFallback")
     public MailResponse sendMail(MailDetails mailDetails) {
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
@@ -77,5 +80,15 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
         MailResponse response = new MailResponse("Mensaje Enviado");
 
         return response;
+    }
+
+    private MailResponse fallBackSendEamil(MailDetails mailDetails, CallNotPermittedException e){
+        LOGGER.error("Circuito abierto. No se intento el envio para {}", mailDetails.email());
+        return new MailResponse("Servicio temporalmente  deshabilitado por exceso de fallos");
+    }
+
+    private MailResponse fallBackSendEamil(MailDetails mailDetails, Exception e){
+        LOGGER.error("Error inesperado al enviar correo: {}", e.getMessage());
+        return new MailResponse("");
     }
 }
