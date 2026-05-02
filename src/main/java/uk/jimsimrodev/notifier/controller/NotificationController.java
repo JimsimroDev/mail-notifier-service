@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import uk.jimsimrodev.notifier.controller.resource.SendMailResource;
 import uk.jimsimrodev.notifier.dto.MailDetails;
 import uk.jimsimrodev.notifier.dto.MailResponse;
 import uk.jimsimrodev.notifier.enums.ApiError;
@@ -20,7 +21,7 @@ import uk.jimsimrodev.notifier.service.EmailNotifierServiceImpl;
 
 @RestController
 @RequestMapping("send/mail")
-public class NotificationController {
+public class NotificationController implements SendMailResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationController.class);
 

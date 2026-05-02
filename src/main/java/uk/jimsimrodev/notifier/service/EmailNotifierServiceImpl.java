@@ -92,6 +92,6 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
 
     private MailResponse fallBackSendEamil(MailDetails mailDetails, Exception e){
         LOGGER.error("Error inesperado al enviar correo: {}", e.getMessage());
-        throw new ApiMailException(ApiError.VALIDATION_ERROR);
+        throw new ApiMailException(ApiError.EXCEED_NUMBER_REQUEST);
     }
 }

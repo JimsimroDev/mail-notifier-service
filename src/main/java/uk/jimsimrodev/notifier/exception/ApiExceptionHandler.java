@@ -35,7 +35,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         LOGGER.error("Reason del error {}",reasons.toString());
-        return ResponseEntity.status(ApiError.VALIDATION_ERROR.geHttpStatus())
-                .body(new ErrorDTO(ApiError.VALIDATION_ERROR.getMessage(), reasons));
+        return ResponseEntity.status(ApiError.BAD_REQUESTS.geHttpStatus())
+                .body(new ErrorDTO(ApiError.BAD_REQUESTS.getMessage(), reasons));
     }
 }
