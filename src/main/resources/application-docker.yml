@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: mail-notifier-service
+
+
+server:
+  port: 5002
+  compression:
+    enabled: true
+    min-respnse-size: 2048
+    mime-types: application/json,application/xml,text/xml,text/plain
+  servlet:
+    context-path: /api/v1
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+
+  endpoint: 
+    health: 
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failure-rate-threshold: 50
+        sliding-window-size: 5
+        sliding-window-type: count_based
+
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 1
+
+        register-health-indicator: false
+        record-exceptions:
+          - java.lang.Exception
+  instances:
+    mailSender:
+      base-config: default
+
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 2
+        limit-refresh-period: 60s
+        timeout-duration: 1s
+
+    instances:
+      post-sendMail:
+        base-config: default
+
+send:
+  mail: ${CORREO_PRUEBA}
+  password: ${PASSWORD}
+
+info:
+  application:
+    groupId: '@project.groupId@'
+    artifactId: '@project.artifactId@'
+    version: '@project.version@'
+
+
+app:
+  mail-settings:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    connectionTimeout: 5000
+    timeout: 3000
+    writeTimeout: 3000
