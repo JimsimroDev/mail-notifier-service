@@ -1,120 +1,144 @@
-# Mail Notifier Service
+# Resilient Notification Microservice | Enterprise-Grade Email Gateway
 
-Microservicio para **enviar notificaciones por correo electrónico** vía **SMTP (Gmail)**, diseñado con foco en **Clean Code**, **observabilidad** y **resiliencia** ante fallos de red y abuso (spam).
+![Java](https://img.shields.io/badge/Java-21-007396?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
-- **Stack:** Java 21, Spring Boot 4
-- **Mail:** Spring Mail + Gmail SMTP
-- **Resiliencia:** Resilience4j (Circuit Breaker + Rate Limiter)
-- **Documentación:** OpenAPI / Swagger UI (arquitectura por interfaces)
-- **Infraestructura:** Docker (Dockerfile + docker-compose)
-- **Logs:** SLF4J
+Microservicio de notificaciones por correo diseñado para escenarios reales donde no basta con “enviar un email”. Este servicio prioriza **resiliencia operacional**, **control de abuso** y **diseño limpio de API** para proteger la continuidad del sistema incluso cuando el proveedor SMTP se degrada.
 
 ---
 
-## Demo
+## ¿Qué problema resuelve?
 
-> TODO: Agrega aquí un GIF mostrando el flujo desde Swagger.
+En producción, un gateway de correo enfrenta dos riesgos críticos:
 
-```/dev/null/README-demo.gif#L1-1
-[PLACEHOLDER: demo.gif]
-```
+1. **Abuso de API (spam o ráfagas accidentales)**
+   - Puede agotar cuotas del proveedor SMTP.
+   - Puede disparar bloqueos temporales de cuenta.
+2. **Inestabilidad de proveedores externos (ej. Gmail SMTP)**
+   - Timeouts, respuestas erráticas o caídas parciales.
+   - Si no se aíslan, propagan latencia y fallos al resto del sistema.
+
+### Solución aplicada
+
+Se implementa una capa de protección con **Resilience4j**:
+
+- **Rate Limiter** para controlar ritmo de consumo.
+- **Circuit Breaker** para cortar llamadas a dependencias enfermas y evitar cascadas.
+
+Esto convierte al servicio en un **boundary robusto** entre tu dominio y un tercero no determinista.
 
 ---
 
-## Arquitectura
+## Arquitectura de resiliencia y seguridad
 
-Flujo de alto nivel (request → envío por Gmail):
-
-```/dev/null/architecture.mmd#L1-10
-%% TODO: Reemplaza este diagrama con el definitivo si cambian componentes
+```mermaid
 flowchart LR
-  U[User / Client] --> C[Controller]
-  C --> RL[Resilience4j Rate Limiter]
-  RL --> CB[Resilience4j Circuit Breaker]
-  CB --> G[Gmail SMTP]
+  C[Client / Consumer] --> V[Bean Validation]
+  V --> RL[Rate Limiter\nResilience4j]
+  RL --> CB[Circuit Breaker\nClosed/Open/Half-Open]
+  CB --> S[Notification Service]
+  S --> SMTP[Gmail SMTP Provider]
+
+  RL -.429 Too Many Requests.-> C
+  CB -.503 Service Unavailable.-> C
 ```
 
-Notas de diseño:
-- La **documentación OpenAPI** está desacoplada del controlador usando una interfaz (`SendMailResource`).
-- El **Rate Limiter** protege el endpoint contra spam: **2 requests/min**.
-- El **Circuit Breaker** evita cascadas de fallos cuando el proveedor SMTP (o la red) está inestable.
+El flujo protege primero la entrada (validación + rate control) y luego el acceso al proveedor externo (circuit breaker), asegurando que el thread principal no quede bloqueado por una dependencia degradada.
 
 ---
 
-## Características principales
+## Resiliencia (sección crítica)
 
-- 🛡️ **Resiliencia**: Circuit Breaker + Rate Limiter (Resilience4j)
-- 🧭 **API documentada**: Swagger UI / OpenAPI (contratos vía interfaces)
-- 🐳 **Docker ready**: build y ejecución reproducible
-- 🧾 **Validación**: DTOs con Bean Validation (`@NotBlank`, `@Email`)
-- 🧵 **Trazabilidad**: logging con SLF4J
-- ⚙️ **Configuración por entorno**: variables `.env` (no se versiona)
+### 1) Rate Limiting — ¿por qué 5 req/min?
+
+Una política de **5 req/min por consumidor** es una referencia sólida para entornos iniciales porque:
+
+- Reduce la probabilidad de **agotamiento de cuota SMTP**.
+- Mitiga picos de tráfico malicioso o errores de cliente (loops/reintentos sin control).
+- Mantiene costo operativo predecible y evita throttling agresivo del proveedor.
+
+> Nota: en esta demo la configuración puede variar (ej. `2/min`) para facilitar pruebas controladas; en producción la recomendación base es `5/min` y ajustar por métricas.
+
+### 2) Circuit Breaker — papel del estado Half-Open
+
+El **Half-Open** es el estado de diagnóstico controlado:
+
+- Tras un período en **Open**, el breaker permite un número mínimo de llamadas de prueba.
+- Si esas llamadas son exitosas, vuelve a **Closed**.
+- Si fallan, retorna a **Open** sin exponer el sistema a una nueva tormenta de errores.
+
+Resultado: se protege el **hilo de ejecución principal** de latencias repetitivas, timeouts encadenados y consumo innecesario de recursos cuando SMTP está degradado.
 
 ---
 
-## Configuración (Variables de entorno)
+## Interface-First con OpenAPI 3
 
-El proyecto está preparado para cargar configuración desde un archivo `.env` (ver `docker-compose.yml`).
+La documentación no está “pegada” a la implementación del controlador. Se usa enfoque **Interface-First** para definir contrato y semántica de endpoint con OpenAPI, manteniendo:
 
-Crea un archivo `.env` en la raíz del repo con estas variables:
+- Controladores más limpios y enfocados en orquestación.
+- Mejor mantenibilidad del contrato REST.
+- Menor acoplamiento entre documentación y lógica de negocio.
 
-- `CORREO_PRUEBA`: correo que actúa como **remitente** y **destinatario** (actualmente el servicio envía al mismo `send.mail`).
-- `PASSWORD`: contraseña de la cuenta Gmail.
-- `MAIL_HOST`: host SMTP.
-- `MAIL_PORT`: puerto SMTP.
+Swagger UI:
+- `http://localhost:5002/api/v1/swagger-ui.html`
+- `http://localhost:5002/api/v1/documentation`
 
-Ejemplo recomendado:
+---
 
-```/dev/null/.env.example#L1-10
+## Infraestructura: Docker multi-stage + Layertools
+
+El `Dockerfile` usa estrategia multi-stage con extracción por capas (`jarmode=layertools`):
+
+- **Optimiza caché de build**: dependencias cambian menos que el código de aplicación.
+- **Reduce tiempo de reconstrucción** en CI/CD.
+- **Disminuye peso final de imagen** y mejora tiempo de pull/deploy.
+- Mantiene imagen runtime más limpia al separar etapa de compilación.
+
+---
+
+## Guía de instalación profesional
+
+### 1) Clonar y configurar variables
+
+Crea archivo `.env` en la raíz:
+
+```env
 CORREO_PRUEBA=tu-cuenta@gmail.com
 PASSWORD=tu-app-password
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 ```
 
-### Gmail: credenciales seguras
+### 2) Configurar Gmail App Password (requerido)
 
-Para Gmail normalmente necesitas un **App Password** (no tu contraseña real), dependiendo de la configuración de seguridad de tu cuenta.
+1. Activa verificación en dos pasos en Google Account.
+2. Genera un **App Password** para “Mail”.
+3. Usa ese valor en `PASSWORD`.
 
----
+> No uses tu contraseña principal de Gmail en ambientes locales ni productivos.
 
-## Instalación y ejecución con Docker
+### 3) Construir y levantar
 
-### 1) Construir el JAR
-
-Este `Dockerfile` asume que ya existe el JAR en `target/*.jar`.
-
-```/dev/null/commands.sh#L1-3
+```bash
 ./mvnw -DskipTests clean package
-```
-
-### 2) Build de la imagen
-
-```/dev/null/commands.sh#L5-7
 docker build -t mail-notifier-service:local .
-```
-
-### 3) Ejecutar con Docker Compose
-
-```/dev/null/commands.sh#L9-12
 docker compose up --build
 ```
 
-La API quedará disponible en:
+API base:
 - `http://localhost:5002/api/v1`
 
 ---
 
-## Endpoints
+## Endpoint principal
 
-### Endpoint principal
+- `POST /api/v1/send/mail`
 
-- **Base path:** `/api/v1`
-- **Enviar correo (POST):** `/api/v1/send/mail`
+Payload de ejemplo:
 
-Payload esperado:
-
-```/dev/null/request.json#L1-5
+```json
 {
   "name": "Jane Doe",
   "email": "jane.doe@example.com",
@@ -122,24 +146,14 @@ Payload esperado:
 }
 ```
 
-Respuestas relevantes (alto nivel):
-- `200 OK`: envío exitoso.
-- `400 Bad Request`: validación fallida (`@NotBlank`, `@Email`).
-- `429 Too Many Requests`: Rate Limiter (2/min).
-- `503 Service Unavailable`: Circuit Breaker abierto.
-- `500 Internal Server Error`: fallo inesperado al enviar (SMTP, etc.).
-
-### Swagger / OpenAPI
-
-- Swagger UI (por defecto springdoc): `http://localhost:5002/api/v1/swagger-ui.html`
-- Atajo adicional: `http://localhost:5002/api/v1/documentation` (redirecciona a Swagger UI)
+Respuestas clave:
+- `200 OK` envío exitoso.
+- `400 Bad Request` validación de DTO.
+- `429 Too Many Requests` rate limit alcanzado.
+- `503 Service Unavailable` circuit breaker abierto.
 
 ---
 
-## Convenciones y buenas prácticas
+## Demo
 
-- **Separación de responsabilidades**: controller → servicio → integración SMTP.
-- **Contratos de API** en interfaces para evitar acoplar documentación a implementación.
-- **Resiliencia por defecto**: limitación de tasa y circuit breaker para robustez.
-
----
+![DEMO](https://res.cloudinary.com/dzngz770f/image/upload/v1777826443/demo_thvdlx.gif)
