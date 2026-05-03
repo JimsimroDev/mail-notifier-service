@@ -13,7 +13,7 @@ Microservicio para **enviar notificaciones por correo electrónico** vía **SMTP
 
 ## Demo
 
-> TODO: Agrega aquí un GIF mostrando el flujo desde Postman.
+> TODO: Agrega aquí un GIF mostrando el flujo desde Swagger.
 
 ```/dev/null/README-demo.gif#L1-1
 [PLACEHOLDER: demo.gif]
@@ -49,8 +49,6 @@ Notas de diseño:
 - 🧾 **Validación**: DTOs con Bean Validation (`@NotBlank`, `@Email`)
 - 🧵 **Trazabilidad**: logging con SLF4J
 - ⚙️ **Configuración por entorno**: variables `.env` (no se versiona)
-
-> Nota: si prefieres README sin iconos, dímelo y lo dejo 100% “plain”.
 
 ---
 
@@ -145,11 +143,3 @@ Respuestas relevantes (alto nivel):
 - **Resiliencia por defecto**: limitación de tasa y circuit breaker para robustez.
 
 ---
-
-## Roadmap (opcional)
-
-Ideas típicas para evolución del servicio:
-- Soporte para múltiples destinatarios.
-- Plantillas HTML con Thymeleaf (ya está incluido el starter).
-- Métricas de Resilience4j expuestas en Actuator.
-- Autenticación (API key/JWT) para proteger el endpoint públicamente.
