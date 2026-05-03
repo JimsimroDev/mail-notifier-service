@@ -74,3 +74,6 @@ app:
     connectionTimeout: 5000
     timeout: 3000
     writeTimeout: 3000
+
+cors-settings:
+  url: ${URL_CORS_PERMITION}
