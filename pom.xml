@@ -10,7 +10,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>uk.jimsimrodev</groupId>
-	<artifactId>mail-notifier-service</artifactId>
+	<artifactId>resilient-notification-microservice</artifactId>
 	<version>0.0.1</version>
 	<name />
 	<description />

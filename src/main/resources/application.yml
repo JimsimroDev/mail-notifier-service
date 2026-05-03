@@ -1,6 +1,6 @@
 spring:
   application:
-    name: mail-notifier-service
+    name: Resilient Notification Microservice
 
 
 server:
