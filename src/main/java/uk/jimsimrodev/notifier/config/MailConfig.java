@@ -1,7 +1,5 @@
 package uk.jimsimrodev.notifier.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +10,7 @@ import java.util.Properties;
 
 @Configuration
 public class MailConfig {
-private static final Logger LOGGER= LoggerFactory.getLogger(MailConfig.class);
+
     @Value("${send.username}")
     private String userName;
 
@@ -46,7 +44,7 @@ private static final Logger LOGGER= LoggerFactory.getLogger(MailConfig.class);
 
         Properties props = mailSenderImpl.getJavaMailProperties();
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.starttls.enable", "true");
 
         props.put("mail.debug", "true");
 
