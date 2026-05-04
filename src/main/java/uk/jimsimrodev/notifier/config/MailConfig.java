@@ -12,7 +12,7 @@ import java.util.Properties;
 
 @Configuration
 public class MailConfig {
-private static final Logger LOGGER= LoggerFactory.getLogger(MailConfig.class);
+
     @Value("${send.username}")
     private String userName;
 
@@ -46,7 +46,7 @@ private static final Logger LOGGER= LoggerFactory.getLogger(MailConfig.class);
 
         Properties props = mailSenderImpl.getJavaMailProperties();
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.ssl.enable", "true");
+        props.put("mail.smtp.starttls.enable", "true");
 
         props.put("mail.debug", "true");
 
