@@ -5,12 +5,9 @@ import java.time.format.DateTimeFormatter;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -26,10 +23,10 @@ import uk.jimsimrodev.notifier.service.impl.EmailNotifierService;
 public class EmailNotifierServiceImpl implements EmailNotifierService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmailNotifierServiceImpl.class);
 
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
     @Value("${send.mail}")
-    private String emailUser;
+    private String correPrueba;
 
     public EmailNotifierServiceImpl(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -62,8 +59,8 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
                             FECHA: %s
                     """, mailDetails.name(), mailDetails.email(), mailDetails.message(), fecha);
 
-        simpleMailMessage.setFrom(emailUser);// quien lo envia
-        simpleMailMessage.setTo(emailUser);
+        simpleMailMessage.setFrom(correPrueba);// quien lo envia
+        simpleMailMessage.setTo(correPrueba); // a donde se envia
 
         simpleMailMessage.setSubject("[Portafolio] Nuevo mensaje de " + mailDetails.name());
         LOGGER.debug("Construyendo mensaje de asunto {}",simpleMailMessage.getSubject());
@@ -72,17 +69,15 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
         simpleMailMessage.setText(cuerpo);
 
         try {
-            LOGGER.info("Intentando envio de Gmail para...: {}", mailDetails.email());
+            LOGGER.info("Intentando envio de Gmail para...: {}", correPrueba);
             mailSender.send(simpleMailMessage);
-            LOGGER.info("Correo enviado exitosamente a ... {}", emailUser);
+            LOGGER.info("Correo enviado exitosamente a ... {}", correPrueba);
         } catch (MailException e) {
             LOGGER.error(e.getClass().getName()+" Error: {}", e.getMessage());
             throw new ApiMailException(ApiError.INTERNAL_SERVER_ERROR);
         }
 
-        MailResponse response = new MailResponse("Mensaje Enviado");
-
-        return response;
+        return new MailResponse("Mensaje Enviado");
     }
 
     private MailResponse fallBackSendEamil(MailDetails mailDetails, CallNotPermittedException e){
