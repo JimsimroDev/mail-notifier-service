@@ -43,7 +43,7 @@ public class MailConfig {
         Properties props = mailSenderImpl.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.enable", "false");
         props.put("mail.debug", "true");
 
         //Manejo de timeouts
