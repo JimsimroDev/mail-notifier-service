@@ -71,9 +71,9 @@ app:
   mail-settings:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
-    connectionTimeout: 5000
-    timeout: 3000
-    writeTimeout: 3000
+    connectionTimeout: 10000
+    timeout: 10000
+    writeTimeout: 10000
 
 cors-settings:
   url: ${URL_CORS_PERMITION}
