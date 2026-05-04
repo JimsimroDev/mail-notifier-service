@@ -42,7 +42,7 @@ public interface SendMailResource {
            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(examples = @ExampleObject(name="SendMail",summary="Example post send mail",value= """
                    {
                      "name":"prueba",
-                     "email":"correopreuba@coreocom",
+                     "email":"correopreuba@coreo.com",
                      "message":"esto es una prueba"
                    } 
                    """)))
