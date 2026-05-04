@@ -17,6 +17,9 @@ management:
       base-path: /
       exposure:
         include: "*"
+        cors:
+          allowed-origins: ${URL_CORS_PERMITION}
+          allowed-methods: "GET,OPTIONS"
   info:
     env:
       enabled: true
