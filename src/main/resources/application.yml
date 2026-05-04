@@ -20,9 +20,9 @@ management:
       show-details: always
   endpoints:
     web:
-      base-path: /
+      base-path: /actuator
       exposure:
-        include: "*"
+        include: health
       cors:
         allowed-origins: ${URL_CORS_PERMITION}
         allowed-methods: "GET,OPTIONS"
