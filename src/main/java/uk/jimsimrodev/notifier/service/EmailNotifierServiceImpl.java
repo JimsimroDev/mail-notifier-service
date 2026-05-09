@@ -32,17 +32,18 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
         this.mailSender = mailSender;
     }
 
+
     @Override
     @CircuitBreaker(name="mailSender",fallbackMethod = "mailSenderFallback")
     public MailResponse sendMail(MailDetails mailDetails) {
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyy - HH:mm:ss");
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("'el ' dd/MM/yyy 'a las' HH:mm:ss");
 
         String fecha = LocalDateTime.now().format(formato);
 
-        String cuerpo = String.format("""
+        String miCuerpo = """
                 Nuevo formulario de envío en el portafolio
                 Alguien acaba de enviar un formulario en dev.jimsimrodev.uk/
                  Esto es lo que tenía que decir:
@@ -57,8 +58,20 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
                              %s
 
                             FECHA: %s
-                    """, mailDetails.name(), mailDetails.email(), mailDetails.message(), fecha);
+                    """.formatted( mailDetails.name(), mailDetails.email(), mailDetails.message(), fecha);
 
+        String cuerpo = """
+                "Hola, gracias por tu interés en mi perfil profesional. He recibido tu mensaje correctamente a través de mi portafolio.
+                
+                Actualmente me encuentro atendiendo mis compromisos académicos de 8.º semestre de Ingeniería de Sistemas, por lo que este es un mensaje automático. Revisaré tu consulta personalmente y te daré una respuesta lo antes posible.
+                
+                Un saludo cordial,
+                Jimmis Jhoan Simanca Rojas
+                Backend Developer | Java Specialist"
+
+                            FECHA: %s
+                    """.formatted(fecha);
+//Se envia al correo del  desarrollador
         simpleMailMessage.setFrom(correPrueba);// quien lo envia
         simpleMailMessage.setTo(correPrueba); // a donde se envia
 
@@ -66,7 +79,8 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
         LOGGER.debug("Construyendo mensaje de asunto {}",simpleMailMessage.getSubject());
 
         simpleMailMessage.setReplyTo(mailDetails.email());
-        simpleMailMessage.setText(cuerpo);
+        simpleMailMessage.setText(miCuerpo);
+
 
         try {
             LOGGER.info("Intentando envio de Gmail para...: {}", correPrueba);
@@ -76,6 +90,17 @@ public class EmailNotifierServiceImpl implements EmailNotifierService {
             LOGGER.error(e.getClass().getName()+" Error: {}", e.getMessage());
             throw new ApiMailException(ApiError.INTERNAL_SERVER_ERROR);
         }
+        //Se envia a quien llena el formulario
+        simpleMailMessage.setFrom(correPrueba);// quien lo envia
+        simpleMailMessage.setTo(mailDetails.email()); // a donde se envia
+
+        simpleMailMessage.setSubject("¡Gracias por contactarme! - Jimmis J. Simanca");
+        LOGGER.debug("Construyendo mensaje de asunto {}",simpleMailMessage.getSubject());
+
+        simpleMailMessage.setReplyTo(correPrueba);
+        simpleMailMessage.setText(cuerpo);
+
+        mailSender.send(simpleMailMessage);
 
         return new MailResponse("Mensaje Enviado");
     }
