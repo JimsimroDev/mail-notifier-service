@@ -5,5 +5,4 @@ import uk.jimsimrodev.notifier.dto.MailResponse;
 
 public interface EmailNotifierService {
     MailResponse sendMail(MailDetails mailDetails);
-
 }

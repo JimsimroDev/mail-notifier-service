@@ -8,6 +8,5 @@ public class MailNotifierServiceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MailNotifierServiceApplication.class, args);
-	}
-
+	}   
 }

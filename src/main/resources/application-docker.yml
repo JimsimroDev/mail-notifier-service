@@ -60,22 +60,12 @@ resilience4j:
 send:
   username: ${USER_NAME}
   mail: ${CORREO_PRUEBA}
-  password: ${PASSWORD}
 
 info:
   application:
     groupId: '@project.groupId@'
     artifactId: '@project.artifactId@'
     version: '@project.version@'
-
-
-app:
-  mail-settings:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    connectionTimeout: 10000
-    timeout: 10000
-    writeTimeout: 10000
 
 cors-settings:
   url: ${URL_CORS_PERMITION}

@@ -13,5 +13,4 @@ public record MailDetails(
 
         @NotBlank(message = "Debes llenar todos los campos")
         String message) {
-
 }

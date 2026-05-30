@@ -1,4 +1,4 @@
 package uk.jimsimrodev.notifier.dto;
 
-public record MailResponse(String estado) {  
+public record MailResponse(String estado) {
 }
